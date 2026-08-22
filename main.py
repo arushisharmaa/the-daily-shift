@@ -122,14 +122,16 @@ def generate_digest_data(raw_data: dict[str, list[dict]]) -> DailyDigestPayload:
 def send_email_digest(digest: DailyDigestPayload):
     """Build HTML template and dispatch email via Resend SDK."""
     resend_key = os.getenv("RESEND_API_KEY")
-    recipient = os.getenv("RECIPIENT_EMAIL")
+    # Default to your Resend account email if RECIPIENT_EMAIL isn't set in environment
+    recipient = os.getenv("RECIPIENT_EMAIL", "arushisharma264@gmail.com")
 
-    if not resend_key or not recipient:
-        raise ValueError("RESEND_API_KEY or RECIPIENT_EMAIL environment variable is missing.")
+    if not resend_key:
+        raise ValueError("RESEND_API_KEY environment variable is missing.")
 
     resend.api_key = resend_key
     date_str = datetime.datetime.now().strftime("%B %d, %Y")
-
+    
+    # ... rest of the function remains the same ...
     sections_html = ""
     for cat in digest.categories:
         sections_html += f"""
