@@ -104,7 +104,7 @@ def generate_digest_data(raw_data: dict[str, list[dict]]) -> DailyDigestPayload:
     """
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.6-flash",
         contents=prompt_content,
         config=types.GenerateContentConfig(
             system_instruction=system_instruction,
