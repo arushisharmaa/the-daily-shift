@@ -122,7 +122,6 @@ def generate_digest_data(raw_data: dict[str, list[dict]]) -> DailyDigestPayload:
 def send_email_digest(digest: DailyDigestPayload):
     """Build HTML template and dispatch email via Resend SDK."""
     resend_key = os.getenv("RESEND_API_KEY")
-    # Default to your Resend account email if RECIPIENT_EMAIL isn't set in environment
     recipient = os.getenv("RECIPIENT_EMAIL", "arushisharma264@gmail.com")
 
     if not resend_key:
@@ -130,34 +129,56 @@ def send_email_digest(digest: DailyDigestPayload):
 
     resend.api_key = resend_key
     date_str = datetime.datetime.now().strftime("%B %d, %Y")
-    
-    # ... rest of the function remains the same ...
+
     sections_html = ""
     for cat in digest.categories:
         sections_html += f"""
-        <div style="margin-top: 24px; margin-bottom: 12px; border-bottom: 2px solid #3b82f6; padding-bottom: 4px;">
-            <h2 style="color: #60a5fa; font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase; margin: 0;">{cat.category_name}</h2>
-        </div>
+        <div style="margin-top: 32px; margin-bottom: 16px;">
+            <div style="font-size: 11px; font-weight: 800; color: #2563eb; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
+                {cat.category_name}
+            </div>
+            <div style="border-bottom: 2px solid #e2e8f0; margin-bottom: 16px;"></div>
         """
         for item in cat.items:
             sections_html += f"""
-            <div style="margin-bottom: 14px; padding: 14px; background-color: #1e293b; border-radius: 8px;">
-                <a href="{item.link}" style="color: #38bdf8; font-size: 15px; font-weight: bold; text-decoration: none;">{item.title}</a>
-                <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0 0; line-height: 1.4;">{item.body}</p>
+            <div style="margin-bottom: 20px;">
+                <a href="{item.link}" style="font-size: 16px; font-weight: 700; color: #0f172a; text-decoration: none; line-height: 1.3; display: block; margin-bottom: 4px;">
+                    {item.title} <span style="color: #2563eb; font-size: 14px;">&rarr;</span>
+                </a>
+                <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.5;">
+                    {item.body}
+                </p>
             </div>
             """
+        sections_html += "</div>"
 
     full_html = f"""
     <!DOCTYPE html>
     <html>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 24px; max-width: 600px; margin: 0 auto;">
-      <div style="margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 12px;">
-        <span style="color: #34d399; font-size: 11px; font-weight: bold; letter-spacing: 1.5px;">THE DAILY SHIFT • {date_str.upper()}</span>
-        <h1 style="color: #ffffff; font-size: 22px; margin: 4px 0 0 0;">What Moved Today</h1>
-      </div>
-      {sections_html}
-      <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #334155; font-size: 12px; color: #64748b; text-align: center;">
-        The Daily Shift • Zero Fluff News
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 40px 16px;">
+      <div style="max-width: 560px; margin: 0 auto; background-color: #ffffff; padding: 32px 28px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        
+        <!-- Header -->
+        <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 12px;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 2px; text-transform: uppercase;">
+            THE DAILY SHIFT &bull; {date_str.upper()}
+          </div>
+          <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 6px 0 0 0; letter-spacing: -0.5px;">
+            What Moved Today
+          </h1>
+        </div>
+
+        <!-- Dynamic Content -->
+        {sections_html}
+
+        <!-- Footer -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center;">
+          The Daily Shift &bull; Automated Daily Briefing
+        </div>
+
       </div>
     </body>
     </html>
@@ -166,7 +187,7 @@ def send_email_digest(digest: DailyDigestPayload):
     params = {
         "from": "The Daily Shift <onboarding@resend.dev>",
         "to": [recipient],
-        "subject": f"The Daily Shift - {date_str}",
+        "subject": f"The Daily Shift — {date_str}",
         "html": full_html,
     }
 
